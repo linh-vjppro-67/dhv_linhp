@@ -1,0 +1,99 @@
+.edit-document-modal {
+  overflow: auto;
+  padding: 24px;
+}
+
+.edit-document-modal form {
+  width: min(1280px, 96vw);
+  max-height: 94vh;
+  overflow: auto;
+}
+
+.edit-document-layout {
+  display: grid;
+  grid-template-columns: minmax(360px, 1fr) minmax(480px, 1.25fr);
+  gap: 24px;
+}
+
+.edit-file-preview {
+  min-height: 520px;
+  border: 1px solid #cdd3da;
+  background: #f4f6f8;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.edit-file-preview > b {
+  font-size: 13px;
+  color: #526071;
+}
+
+.edit-file-preview object {
+  width: 100%;
+  height: 560px;
+  background: white;
+}
+
+.preview-empty {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  color: #7b8490;
+  background: white;
+}
+
+.req {
+  color: #c51622;
+  font-weight: 700;
+}
+
+.office-opinion-modal form { width: min(1120px, 96vw); max-height: 94vh; overflow: auto; }
+.office-opinion-layout { display: grid; grid-template-columns: .85fr 1.15fr; gap: 28px; }
+.office-opinion-layout textarea { min-height: 260px; }
+.a4-opinion-preview { width: min(100%, 460px); aspect-ratio: 210/297; justify-self: center; background: #fff; border: 1px solid #cfd5dc; box-shadow: 0 8px 24px #17212d20; padding: 34px 30px; color: #27364a; display: flex; flex-direction: column; }
+.a4-school { text-align: center; font-size: 9px; font-weight: 700; }
+.a4-opinion-preview h3 { color: #791019; text-align: center; font: 700 16px "Times New Roman"; margin: 22px 0 34px; }
+.a4-note-box { border: 1px solid #9aa3ad; min-height: 330px; padding: 20px; display: flex; flex-direction: column; }
+.a4-note-box > b { color: #791019; font-size: 10px; text-align: center; }
+.a4-note-box > p { white-space: pre-wrap; font-size: 11px; line-height: 1.5; flex: 1; overflow: hidden; }
+.a4-sign { align-self: flex-end; border: 2px solid #bd0b18; color: #bd0b18; border-radius: 50%; width: 145px; min-height: 58px; display: grid; place-content: center; text-align: center; padding: 7px; }
+.a4-sign strong { font-size: 9px; }.a4-sign small { font-size: 8px; margin-top: 3px; }
+.a4-opinion-preview > small { text-align: center; color: #737d89; font-size: 8px; margin-top: auto; }
+@media(max-width:900px){.office-opinion-layout{grid-template-columns:1fr}.a4-opinion-preview{width:min(100%,430px)}}
+
+.document-view-modal { padding: 20px; }
+.document-view-modal > section { width: min(1280px, 97vw); height: min(94vh, 980px); background: white; display: flex; flex-direction: column; border-radius: 8px; overflow: hidden; }
+.document-view-modal header { padding: 18px 24px; margin: 0; border-bottom: 1px solid #dde2e7; }
+.document-view-modal header h2 { margin: 0; font-family: "Times New Roman"; color: #731018; }
+.document-view-modal header p { margin: 5px 0 0; }
+.document-view-modal header button { border: 1px solid #ccd2d8; background: white; border-radius: 4px; padding: 9px 16px; }
+.view-document-meta { padding: 12px 24px; border-bottom: 1px solid #dde2e7; display: grid; gap: 4px; }
+.view-document-meta span { color: #687383; font-size: 13px; }
+.view-document-meta p { margin: 5px 0 0; padding: 9px 12px; background: #fff8e8; border-left: 3px solid #d4ae4f; font-size: 13px; }
+.view-document-pdf { flex: 1; min-height: 0; background: #e9edf1; padding: 14px; }
+.view-document-pdf object { width: 100%; height: 100%; background: white; }
+
+@media (max-width: 950px) {
+  .edit-document-layout { grid-template-columns: 1fr; }
+  .edit-file-preview { min-height: 420px; }
+  .edit-file-preview object { height: 440px; }
+}
+
+.email-compose-modal form { width: min(860px, 96vw); max-height: 94vh; overflow: auto; }
+.email-compose-modal input { min-height: 42px; }
+.email-compose-modal textarea[name="emails"] { min-height: 68px; }
+.rich-editor { border: 1px solid #cbd3de; border-radius: 6px; overflow: hidden; background: #fff; }
+.rich-toolbar { display: flex; flex-wrap: wrap; gap: 4px; padding: 7px; border-bottom: 1px solid #dfe4ea; background: #f6f8fa; }
+.rich-toolbar button,.rich-toolbar select,.rich-image { min-height: 32px; padding: 5px 9px; border: 1px solid #ccd3dc; border-radius: 4px; background: #fff; color: #27364a; font: inherit; cursor: pointer; }
+.rich-image { display: inline-flex; align-items: center; }
+.rich-image input { display: none; }
+.rich-content { padding: 12px; outline: none; line-height: 1.5; overflow: auto; }
+.rich-content:empty:before { content: attr(data-placeholder); color: #98a1ad; pointer-events: none; }
+.rich-content img { max-width: 100%; height: auto; }
+.signature-editor .rich-content img { width: auto; max-width: 100px; height: auto; object-fit: contain; }
+.rich-required { display: block; padding: 5px 9px; color: #b91c28; background: #fff7f7; }
+.email-hint { color: #667386; font-size: 13px; }
+.signature-config { grid-column: 1 / -1; display: grid; gap: 7px; }
+.signature-config > small { color: #687486; }

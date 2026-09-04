@@ -1,0 +1,13 @@
+services:
+  smart-search:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./documents:/app/documents
+      - ./data:/app/data
+    environment:
+      SEARCH_PROFILE: smart
+      OCR_LANGUAGES: vie+eng
+      MODEL_DEVICE: cpu
+      INDEX_WORKERS: 2

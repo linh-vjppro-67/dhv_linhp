@@ -3,6 +3,8 @@ from typing import List, Optional
 import json
 
 import pymupdf
+import pytesseract
+from PIL import Image
 from docx import Document
 
 from .config import (
@@ -116,6 +118,27 @@ def _page_needs_ocr(page, native_text: str) -> bool:
     return False
 
 
+def _native_text_is_scrambled(native_text: str) -> bool:
+    """Detect PDFs whose embedded glyph order produces one unusable mega-line."""
+    lines = [line.strip() for line in native_text.splitlines() if line.strip()]
+    if len(native_text) < 300 or not lines:
+        return False
+    return max(map(len, lines)) > max(500, len(native_text) * 0.55)
+
+
+def _ocr_page_image(page) -> str:
+    scale = OCR_DPI / 72
+    pix = page.get_pixmap(matrix=pymupdf.Matrix(scale, scale), alpha=False)
+    image = Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
+    # PSM 4 preserves administrative-document blocks much better than reading
+    # the PDF's often corrupted embedded glyph order.
+    return normalize_display_text(
+        pytesseract.image_to_string(
+            image, lang=OCR_LANGUAGES, config="--psm 4"
+        )
+    )
+
+
 def extract_pdf(path: Path) -> List[ExtractedUnit]:
     units: List[ExtractedUnit] = []
 
@@ -130,7 +153,8 @@ def extract_pdf(path: Path) -> List[ExtractedUnit]:
                 )
             )
 
-            if not _page_needs_ocr(page, native_text):
+            force_ocr = _native_text_is_scrambled(native_text)
+            if not force_ocr and not _page_needs_ocr(page, native_text):
                 if native_text:
                     units.append(
                         ExtractedUnit(
@@ -143,19 +167,7 @@ def extract_pdf(path: Path) -> List[ExtractedUnit]:
 
             try:
                 with suppress_native_stderr(QUIET_TESSERACT):
-                    text_page = page.get_textpage_ocr(
-                        language=OCR_LANGUAGES,
-                        dpi=OCR_DPI,
-                        full=True,
-                    )
-
-                    ocr_text = normalize_display_text(
-                        page.get_text(
-                            "text",
-                            textpage=text_page,
-                            sort=True,
-                        )
-                    )
+                    ocr_text = _ocr_page_image(page)
 
             except Exception as exc:
                 raise RuntimeError(
@@ -164,7 +176,7 @@ def extract_pdf(path: Path) -> List[ExtractedUnit]:
                     f"'{OCR_LANGUAGES}'. Chi tiết: {exc}"
                 ) from exc
 
-            if len(ocr_text) >= len(native_text):
+            if force_ocr or len(ocr_text) >= len(native_text):
                 final_text = ocr_text
                 mode = "ocr_pdf"
             else:

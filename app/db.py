@@ -109,6 +109,43 @@ def get_documents_for_root(source_root: str) -> Dict[str, dict]:
     }
 
 
+def get_document_by_id(document_id: int) -> Optional[dict]:
+    init_db()
+    with connect() as conn:
+        row = conn.execute(
+            "SELECT * FROM documents WHERE id = ?",
+            (document_id,),
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def get_indexed_documents() -> List[dict]:
+    init_db()
+    with connect() as conn:
+        rows = conn.execute(
+            """SELECT id, file_name, category, extension, relative_path, chunk_count
+               FROM documents WHERE status = 'indexed' ORDER BY file_name"""
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def fetch_chunks_for_documents(document_ids: Iterable[int], limit: int = 240) -> List[dict]:
+    ids = list(dict.fromkeys(int(i) for i in document_ids if int(i) > 0))
+    if not ids:
+        return []
+    placeholders = ",".join("?" for _ in ids)
+    with connect() as conn:
+        rows = conn.execute(
+            f"""SELECT c.id, c.document_id, c.page_no, c.chunk_no, c.content,
+                       d.file_name, d.category
+                FROM chunks c JOIN documents d ON d.id = c.document_id
+                WHERE c.document_id IN ({placeholders})
+                ORDER BY c.document_id, c.chunk_no LIMIT ?""",
+            [*ids, limit],
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
 def get_document_chunk_ids(document_id: int) -> List[int]:
     with connect() as conn:
         rows = conn.execute(

@@ -11,6 +11,7 @@ from app.search_engine import (
     debug_search,
     search,
 )
+from app.qwen_chat import chat_search
 
 
 def _print_json(data):
@@ -82,6 +83,10 @@ def main():
     p_debug.add_argument(
         "query"
     )
+
+    p_chat = sub.add_parser("chat")
+    p_chat.add_argument("message")
+    p_chat.add_argument("--top-k", type=int, default=5)
     p_debug.add_argument(
         "--top-k",
         type=int,
@@ -129,6 +134,9 @@ def main():
                 top_k=args.top_k,
             )
         )
+
+    elif args.command == "chat":
+        _print_json(chat_search(args.message, top_k=args.top_k))
 
     elif args.command == "stats":
         _print_json(

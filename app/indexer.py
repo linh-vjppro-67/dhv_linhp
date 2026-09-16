@@ -127,6 +127,7 @@ def _run_extract_jobs(
     db_docs,
     workers: int,
     use_cache: bool,
+    force_reextract: bool = False,
 ):
     jobs = []
 
@@ -135,7 +136,7 @@ def _run_extract_jobs(
             info.relative_path
         )
 
-        old_hash = (
+        old_hash = None if force_reextract else (
             old.get("sha256")
             if old
             else None
@@ -210,6 +211,7 @@ def sync_folder(
     folder: str,
     workers: int = DEFAULT_WORKERS,
     use_cache: bool = True,
+    force_reextract: bool = False,
 ):
     if not _SYNC_LOCK.acquire(
         blocking=False
@@ -254,7 +256,7 @@ def sync_folder(
                 new_files.append(info)
                 continue
 
-            if (
+            if (not force_reextract and
                 int(old["file_size"])
                 == int(info.file_size)
                 and int(old["modified_ns"])
@@ -317,6 +319,7 @@ def sync_folder(
                 int(workers),
             ),
             use_cache=use_cache,
+            force_reextract=force_reextract,
         )
 
         prepared = []

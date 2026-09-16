@@ -3,6 +3,7 @@ from pathlib import Path
 import streamlit as st
 
 from app.indexer import sync_folder
+from app.qwen_chat import chat_search, status as qwen_status
 from app.search_engine import search
 
 
@@ -16,10 +17,19 @@ st.title(
 )
 
 st.caption(
-    "Exact + typo tolerant + semantic + reranker"
+    "BGE retrieval + Qwen chat completion, chạy local"
 )
 
 with st.sidebar:
+    mode = st.radio(
+        "Chế độ",
+        ("Hỏi Qwen", "Tìm trực tiếp"),
+    )
+    qwen = qwen_status()
+    st.caption(
+        f"Qwen: {'sẵn sàng' if qwen['ready'] else 'chưa tải'} "
+        f"• {qwen['device']}"
+    )
     folder = st.text_input(
         "Folder tài liệu",
         value=str(
@@ -62,15 +72,48 @@ with st.sidebar:
             )
 
 
-query = st.text_input(
-    "Tìm kiếm",
-    placeholder=(
-        "Ví dụ: phạm thị hậu "
-        "hoặc phạn thị hâuk"
-    ),
-)
-
-if query:
+if mode == "Hỏi Qwen":
+    if "chat_messages" not in st.session_state:
+        st.session_state.chat_messages = []
+    for message in st.session_state.chat_messages:
+        with st.chat_message(message["role"]):
+            st.write(message["content"])
+            if message.get("sources"):
+                with st.expander("Văn bản nguồn"):
+                    for source in message["sources"]:
+                        st.markdown(f"**{source['file_name']}**")
+                        st.caption(f"{source['category']} • score {source['score']}")
+                        st.write(source.get("excerpt", ""))
+    prompt = st.chat_input("Hỏi về nội dung, thời gian hoặc quan hệ giữa các văn bản")
+    if prompt:
+        st.session_state.chat_messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.write(prompt)
+        try:
+            with st.chat_message("assistant"):
+                with st.spinner("Qwen đang đọc kết quả tra cứu..."):
+                    response = chat_search(
+                        prompt,
+                        history=st.session_state.chat_messages[:-1],
+                        top_k=5,
+                    )
+                st.write(response["answer"])
+                with st.expander("Văn bản nguồn"):
+                    for source in response["sources"]:
+                        st.markdown(f"**{source['file_name']}**")
+                        st.caption(f"{source['category']} • score {source['score']}")
+                        st.write(source.get("excerpt", ""))
+            st.session_state.chat_messages.append(
+                {"role": "assistant", "content": response["answer"], "sources": response["sources"]}
+            )
+        except Exception as exc:
+            st.error(str(exc))
+else:
+    query = st.text_input(
+        "Tìm kiếm",
+        placeholder="Ví dụ: phạm thị hậu hoặc phạn thị hâuk",
+    )
+if mode == "Tìm trực tiếp" and query:
     try:
         results = search(
             query,

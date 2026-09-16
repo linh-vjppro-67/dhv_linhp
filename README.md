@@ -10,11 +10,35 @@
 - Production (giao diện + API): `http://localhost:8002`.
 - Development frontend: `http://localhost:5174` (proxy API sang cổng `8002`).
 
-Tài khoản mẫu (mật khẩu chung `123456`): `admin`, `hieu_truong`, `truong_vp`, `van_thu`, `phong_dao_tao`.
+Chạy backend thủ công từ thư mục gốc `dhv_linhp` (đã kích hoạt virtual environment và cài `backend/requirements.txt`):
+
+```bash
+python -m uvicorn backend.app:app --reload --port 8002
+```
+
+Nếu terminal đang ở `dhv_linhp/backend`, chạy `cd ..` trước. Health check của hệ thống: `http://127.0.0.1:8002/api/health`.
+
+Không chạy `uvicorn app.main:app` trong thư mục `backend`: file `backend/app.py` sẽ che khuất package `app/` ở thư mục gốc, gây lỗi `'app' is not a package`. Entry point `app.main:app` bên dưới dành cho API OCR/search riêng.
+
+Tài khoản hiện có (mật khẩu chung `123456`): `admin`, `hieu_truong`, `truong_vp`, `van_thu`, `phong_dao_tao`, `phong_tai_chinh_ke_toan`, `phong_cong_tac_sinh_vien`, `phong_khao_thi`, `phong_quan_ly_khoa_hoc`, `phong_truyen_thong`.
 
 Hệ thống có công văn đến/đi, upload bản scan, đánh số riêng theo loại và năm, giữ nhiều số trước, workflow trình/duyệt/yêu cầu sửa/phân công/ký/đóng dấu/phát hành/lưu trữ, phân quyền theo vai trò và phòng ban, nhật ký, dashboard, tra cứu metadata và nội dung PDF. Email và ký số đang là mô phỏng có kiểm soát; trước production phải nối Google Drive/OneDrive/eOffice, SMTP và nhà cung cấp USB Token/HSM/ký từ xa.
 
 Không sử dụng hình dấu tự tạo và không lưu khóa bí mật/PIN trong ứng dụng. Khách hàng phải cung cấp, xác nhận file dấu thật và chứng thư hợp lệ. Thư mục OCR/search cũ bên dưới vẫn được giữ nguyên.
+
+## Công văn đi và công văn nội bộ
+
+Hai loại cùng nằm trong tab **Công văn đi**. Khi tạo, chọn trực tiếp loại **Công văn đi / Quyết định / Kế hoạch / Thông báo**, rồi tải PDF do đơn vị soạn trên máy lên. Quyết định, Kế hoạch và Thông báo là các loại văn bản nội bộ.
+
+Luồng hồ sơ có hai nhánh. Nếu lãnh đạo đơn vị ký số, văn bản được gửi BGH duyệt và BGH không ký lại. Nếu lãnh đạo đơn vị chưa ký, văn bản được gửi BGH duyệt và ký số. Sau khi hoàn tất nhánh tương ứng, hồ sơ chuyển về Văn thư để vào số/ngày, đóng dấu, gửi email và lưu trữ. Khi BGH trả lại, hệ thống tăng phiên bản, lưu lý do và người thao tác trong activity log; đơn vị sửa file rồi chọn lại một trong hai nhánh.
+
+Admin cấp tài khoản tại **Cấu hình hệ thống → Người dùng và vai trò**. Tài khoản **Đơn vị** chỉ thấy hai tab Công văn đến, Công văn đi và chuông thông báo. Tài khoản này được tạo, tải PDF, sửa, ký số và trình BGH đối với công văn đi của đơn vị mình; đối với công văn đến được phân công, tài khoản được thảo luận và gửi lại báo cáo bằng nội dung hoặc tệp PDF/DOCX. Cần gán đúng đơn vị cho tài khoản.
+
+Cấp số theo từng loại văn bản và năm. Lưu trữ giữ nguyên cấu trúc `backend/archive/<năm>/<loại>/`: `CÔNG VĂN ĐI`, `QUYẾT ĐỊNH`, `KẾ HOẠCH`, `THÔNG BÁO`. Ngày ban hành chọn ở form tạo/sửa văn bản, mặc định hôm nay; khi cấp số, hệ thống dùng ngày đã chọn để điền lên PDF. Hồ sơ cũ chưa có ngày sẽ dùng ngày văn phòng nhận văn bản đã được BGH ký. Khi vào số, văn thư khoanh vùng số và dòng ngày trên trang đầu, xem trước rồi xác nhận. Hệ thống thay nội dung ngay trong hai vùng đã chọn trên PDF gốc (kể cả bản scan), không thêm trang. Chữ ký và dấu vẫn là mô phỏng, chưa tích hợp chứng thư số thật. Gửi email cần cấu hình SMTP.
+
+Trong tab **Lưu trữ**, Văn thư/Admin chọn năm tại **Sổ đăng ký số văn bản** và xuất file `.xlsx` theo mẫu của Trường. Workbook giữ các sheet của mẫu và tự điền số ký hiệu, ngày ban hành, trích yếu, người ký, chức vụ, ghi chú; sheet Công văn đến có thêm thông tin chuyển xử lý, đơn vị nhận, thời hạn và kết quả giải quyết.
+
+Hồ sơ nội bộ cũ vẫn xuất hiện trong tab chung và tiếp tục theo trạng thái xử lý cũ; không tự chuyển đổi dữ liệu hay lịch sử đã có.
 
 ## 1. Yêu cầu môi trường cho OCR/search nâng cao
 
@@ -113,6 +137,15 @@ ENABLE_RERANKER=false
 
 Lần chạy đầu tiên ở chế độ `smart`, hệ thống sẽ tải các model cần thiết về máy.
 
+Tải Qwen dùng riêng cho chat completion về máy (chỉ cần chạy một lần):
+
+```bash
+python scripts/download_qwen_chat.py
+```
+
+Model Qwen3-8B 4-bit được lưu tại `models/qwen3-8b-4bit` và chạy bằng MLX trên Apple Silicon. Khi chat, hệ thống chỉ đọc model local;
+BGE-M3 và BGE reranker hiện tại vẫn đảm nhiệm embedding, tìm kiếm và xếp hạng.
+
 ---
 
 ## 4. Chuẩn bị dữ liệu
@@ -171,9 +204,9 @@ python cli.py sync ./documents --workers 1
 
 ---
 
-## 6. Chạy API
+## 6. Chạy API OCR/search riêng
 
-Khởi động FastAPI:
+Khởi động FastAPI từ thư mục gốc `dhv_linhp` (chỉ chạy một API trên cổng `8002` tại một thời điểm):
 
 ```bash
 python -m uvicorn app.main:app --reload --port 8002
@@ -281,6 +314,28 @@ Với kết quả tìm kiếm nội dung, response có thêm `excerpt`:
 }
 ```
 
+### Chat completion bằng Qwen local
+
+Endpoint:
+
+```text
+POST /chat
+```
+
+Ví dụ request:
+
+```json
+{
+  "message": "Có văn bản nào yêu cầu các khoa nộp kế hoạch trước khai giảng không?",
+  "history": [],
+  "top_k": 5
+}
+```
+
+API trả về `answer`, `confidence` và `sources`. Qwen chỉ viết câu trả lời từ
+các đoạn do BGE-M3/FAISS và reranker tìm được. Khi nguồn không đủ rõ, câu trả
+lời phải nêu rằng chưa đủ dữ liệu để xác định.
+
 ---
 
 ## 8. Tìm kiếm bằng CLI
@@ -289,6 +344,12 @@ Tìm kiếm thông thường:
 
 ```bash
 python cli.py search "QĐ-305-24"
+```
+
+Hỏi bằng Qwen local:
+
+```bash
+python cli.py chat "Tìm công văn yêu cầu báo cáo tuyển sinh năm 2026"
 ```
 
 Tìm kiếm nội dung:
@@ -393,6 +454,7 @@ app/
 ├── dense_index.py
 ├── embedder.py
 ├── reranker.py
+├── qwen_chat.py
 └── normalize.py
 
 documents/
@@ -409,7 +471,7 @@ docker-compose.yml
 
 ## 14. Lưu ý khi phát triển
 
-Sau khi thay đổi code API, chạy lại:
+Sau khi thay đổi code API OCR/search riêng, chạy lại từ thư mục gốc `dhv_linhp`:
 
 ```bash
 python -m uvicorn app.main:app --reload --port 8002
@@ -428,3 +490,75 @@ Nếu thay đổi logic extraction/OCR hoặc muốn lập chỉ mục lại d�
 ```bash
 python cli.py sync ./documents --workers 2
 ```
+
+
+### Công văn đến: giao việc và duyệt trên hệ thống
+
+- Sau khi cấp số, Chánh Văn phòng mở **Giao việc / phản hồi**, ghi note phân công, chọn đơn vị, nhập mục đích riêng và chọn vai trò xử lý rồi trình BGH. Mỗi đơn vị cần có tài khoản Đơn vị xử lý đang hoạt động.
+- Hệ thống tạo phiếu đính kèm từ PDF gốc. BGH đọc và đồng ý trước; tiếp theo từng đơn vị bấm **Đã đọc và đồng ý** hoặc **Không đồng ý / Yêu cầu sửa**. Bình luận được lưu theo từng vòng duyệt, chưa gửi email.
+- Chánh VP sửa note và trình lại sẽ tạo vòng mới; xác nhận của vòng cũ không còn hiệu lực. BGH và mọi đơn vị cần đồng ý lại. Lịch sử các vòng được giữ nguyên.
+- Chỉ khi tất cả đồng ý vòng hiện tại, Chánh VP mới có nút **Gửi email báo việc**. Email sử dụng cấu hình SMTP của hệ thống và đính kèm hồ sơ hiện tại. Gửi thành công thì có thể lưu trữ.
+- Hồ sơ đang xử lý theo luồng cũ cần Chánh VP mở **Giao việc / phản hồi** để lập phiếu và danh sách đơn vị theo luồng mới.
+
+Kiểm tra quy trình (dùng dữ liệu tạm, giả lập SMTP, không gửi email thật):
+
+```bash
+backend/.venv/bin/python -m unittest backend.tests.test_incoming_review
+```
+
+Email nhận việc của mỗi phòng ban được quản lý tại **Cấu hình hệ thống → Email các phòng ban**. Phiếu giao việc không nhập email. Hệ thống lấy email cấu hình tại thời điểm gửi; đơn vị chưa có email hợp lệ sẽ chặn gửi, nhưng không chặn duyệt trên hệ thống.
+
+
+### Tải văn bản PDF, DOC và DOCX
+
+Các luồng tạo, sửa, bổ sung văn bản và tải/nộp lại hồ sơ lưu trữ nhận PDF, DOC hoặc DOCX (tối đa 25 MB). DOC/DOCX được chuyển thành PDF để xem, vào số, ký, đóng dấu và lưu trữ; tệp tải xuống trong các luồng này là PDF. Báo cáo xử lý đính kèm vẫn giữ định dạng gốc.
+
+Máy chạy backend cần LibreOffice:
+- macOS: `brew install --cask libreoffice`
+- Debian/Ubuntu: `sudo apt-get install libreoffice-writer fonts-dejavu fonts-liberation`
+
+Backend tự tìm `soffice` hoặc LibreOffice trong Applications trên macOS. Có thể đặt `LIBREOFFICE_PATH` trỏ tới executable nếu cài ở vị trí khác. Thiếu LibreOffice, tải PDF vẫn hoạt động, tải DOC/DOCX trả thông báo cấu hình chưa đủ. Bản xem trước DOC/DOCX dùng cùng cơ chế chuyển đổi với bản lưu; nên kiểm tra bố cục trước khi ký.
+
+
+### Mẫu email của Văn phòng Trường
+
+- Mẫu nhắc báo cáo tháng: ngày nhắc dự kiến 25, hạn nộp ngày 28; tự điền thứ/ngày theo tháng được chọn.
+- Mẫu chuyển công văn đến: tự lấy trích yếu, số/ngày công văn, đơn vị nhận và đề xuất từ phiếu đã duyệt. Nội dung thư theo mẫu công văn đến; vai trò và hạn xử lý xem trong phiếu.
+- Mẫu đơn vị gửi báo cáo: tự điền tên đơn vị, tháng báo cáo và tháng tiếp theo (kể cả chuyển năm).
+
+Mẫu báo cáo có trong cấu hình email, màn hình soạn email và màn hình gửi báo cáo xử lý. Chọn “Dùng mẫu này” để điền nội dung rồi kiểm tra trước khi gửi. Chức năng mẫu chưa kích hoạt lịch tự gửi ngày 25; nhắc hạn vẫn hiển thị trên hệ thống, không tự gửi email.
+
+
+### Soạn và gửi thư qua Gmail
+
+Nút gửi email công văn đi, nội bộ và công văn đến mở Gmail Web, điền sẵn người nhận, tiêu đề và nội dung dạng văn bản. Đăng nhập Gmail bằng tài khoản `ngcphnglinhp6.7.2000@gmail.com`; ứng dụng không lưu mật khẩu Gmail và không dùng SMTP cho thao tác này.
+
+Liên kết soạn thư không đính kèm file tự động. Dùng “Tải PDF để đính kèm”, thêm tệp trong Gmail, chỉnh sửa rồi tự bấm Gửi. Nếu trình duyệt chặn cửa sổ mới, dùng liên kết “Mở cửa sổ soạn thư Gmail” trong hộp thoại.
+
+Mở Gmail không đổi trạng thái hồ sơ. Sau khi gửi thành công, người dùng bấm “Tôi đã gửi thư trong Gmail” để xác nhận và tiếp tục quy trình. Đây là xác nhận thủ công, không phải biên nhận giao thư từ Google. Đã ngừng gọi SMTP tự động khi tải thông báo nhắc hạn.
+
+
+### Lưu trữ có hoặc không gửi mail
+
+Ở bước đã đóng dấu (công văn đi/nội bộ), hoặc BGH và các đơn vị đã đồng ý (công văn đến), người có quyền lưu trữ có thể chọn:
+- **Gửi mail**: mở Gmail, tự gửi, xác nhận đã gửi rồi chọn lưu trữ.
+- **Lưu không gửi mail**: lưu trữ và OCR ngay, không mở Gmail.
+
+Nhật ký lưu trữ ghi rõ có gửi mail hay không. Các bước duyệt, vào số và đóng dấu vẫn phải hoàn thành theo luồng văn bản.
+
+
+### Duyệt yêu cầu xin số trước
+
+Yêu cầu mới chờ Văn thư duyệt và chưa chiếm số. Văn thư có thể duyệt để cấp số, hoặc từ chối kèm lý do. Người tạo yêu cầu bị từ chối được chỉnh sửa rồi trình lại (cùng hồ sơ, tăng phiên bản), hoặc xoá yêu cầu. Chu kỳ từ chối/chỉnh sửa/trình lại có thể lặp nhiều lần. Mỗi lần xử lý được ghi nhật ký. Chỉ yêu cầu đã được duyệt mới được bổ sung văn bản.
+
+Tài khoản đơn vị tự lấy đơn vị đăng nhập; Admin, Văn thư và Chánh VP chọn đơn vị trong cấu hình nhưng yêu cầu vẫn phải qua Văn thư duyệt. Các số đã cấp trước khi bổ sung quy trình này được giữ nguyên.
+
+
+### Số thứ tự hồ sơ lưu trữ
+
+Hồ sơ tải trực tiếp vào lưu trữ dùng chung sổ số với luồng xử lý văn bản và xin số đã được duyệt, theo loại văn bản và năm. Số mới lấy sau số lớn nhất đã cấp/bộ đếm hiện hành, kể cả công văn đến và đi. Hồ sơ đang chờ duyệt lưu trữ chỉ được cấp số khi được duyệt. Văn bản đã có số giữ số đó khi chuyển vào lưu trữ. Danh sách lưu trữ mặc định sắp theo số tăng dần.
+
+
+### Định dạng số/ký hiệu thống nhất
+
+Tất cả loại văn bản cấp số mới dùng cấu trúc số/năm/ký hiệu. Ví dụ: công văn đến `01/2026/CVDEN`, công văn đi `01/2026/ĐHHV`, quyết định `01/2026/QĐ-ĐHHV`, quyết định Hội đồng trường `01/2026/QĐ-HĐT`. Năm theo sổ văn bản; số ít nhất hai chữ số và không cắt bớt khi vượt 99. Áp dụng cho cấp số, xin số được duyệt và hồ sơ tải vào lưu trữ.

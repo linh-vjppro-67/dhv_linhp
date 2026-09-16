@@ -1,0 +1,89 @@
+.modal.incoming-review-overlay {
+  z-index: 1500;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, .58);
+}
+.incoming-review-overlay .incoming-review-panel {
+  width: min(1100px, 100%);
+  max-height: calc(100dvh - 48px);
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #fff;
+  color: #26364a;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 20px 70px #0004;
+}
+.incoming-review-heading { display: flex; align-items: flex-start; gap: 16px; justify-content: space-between; }
+.incoming-review-heading h2 { margin: 0; font-size: 24px; }
+.incoming-review-panel p { line-height: 1.6; overflow-wrap: anywhere; }
+.incoming-review-panel h3 { margin: 24px 0 12px; }
+.incoming-review-panel button { border: 1px solid #ccd2d8; background: #fff; border-radius: 5px; padding: 9px 13px; }
+.incoming-review-panel button:disabled { opacity: .55; cursor: default; }
+.incoming-review-overlay .incoming-review-panel form {
+  width: 100%;
+  max-height: none;
+  overflow: visible;
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid #dfe4ea;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+.incoming-review-assignment { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
+.incoming-review-overlay .incoming-review-assignment label { display: flex; gap: 8px; align-items: center; margin: 0; }
+.incoming-review-overlay input[type=checkbox] { width: 18px; height: 18px; flex: 0 0 18px; margin: 0; }
+.incoming-responsibility-groups { display: grid; gap: 14px; margin: 14px 0 20px; }
+.incoming-responsibility-group { position: relative; }
+.incoming-review-overlay .incoming-responsibility-group > label { display: block; margin: 0 0 6px; color: #344256; font-weight: 700; }
+.incoming-review-overlay .incoming-department-trigger { display: grid; grid-template-columns:minmax(0,1fr) auto 14px; align-items:center; gap:10px; width:100%; min-height:44px; padding:9px 12px; border:1px solid #cbd5e1; border-radius:6px; background:#fff; text-align:left; }
+.incoming-department-trigger:hover,.incoming-responsibility-group.is-open .incoming-department-trigger { border-color:#7385ad; }
+.incoming-department-trigger > span { overflow:hidden; color:#344256; font-weight:600; text-overflow:ellipsis; white-space:nowrap; }
+.incoming-department-trigger > b { padding:3px 8px; border-radius:12px; background:#edf2fb; color:#526071; font-size:11px; white-space:nowrap; }
+.incoming-department-trigger > i { color:#526071; font-style:normal; transition:transform .15s; }
+.incoming-responsibility-group.is-open .incoming-department-trigger > i { transform:rotate(180deg); }
+.incoming-department-menu { position:absolute; z-index:30; top:calc(100% + 5px); right:0; left:0; overflow:hidden; border:1px solid #cbd5e1; border-radius:8px; background:#fff; box-shadow:0 16px 40px rgba(25,42,70,.2); }
+.incoming-department-search { padding:10px; border-bottom:1px solid #e5e9ef; background:#f8fafc; }
+.incoming-review-overlay .incoming-department-search input { width:100%; height:38px; margin:0; padding:8px 10px; border:1px solid #c8d1dd; border-radius:5px; background:#fff; }
+.incoming-department-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); max-height:260px; overflow-y:auto; }
+.incoming-review-overlay .incoming-department-option { display:flex; align-items:center; gap:10px; min-width:0; margin:0; padding:10px 12px; border-bottom:1px solid #edf0f3; cursor:pointer; }
+.incoming-review-overlay .incoming-department-option:nth-child(odd) { border-right:1px solid #edf0f3; }
+.incoming-review-overlay .incoming-department-option:hover { background:#f7f9fc; }
+.incoming-review-overlay .incoming-department-option.selected { background:#edf2fb; }
+.incoming-review-overlay .incoming-department-option input[type=checkbox] { width:18px!important; min-width:18px; height:18px!important; margin:0!important; padding:0; accent-color:#203571; }
+.incoming-department-option > span { min-width:0; }
+.incoming-department-option > span b,.incoming-department-option > span small { display:block; overflow-wrap:anywhere; }
+.incoming-department-option > span b { color:#344256; font-size:12px; }
+.incoming-department-option > span small { margin-top:3px; color:#7a8594; font-size:10px; font-weight:400; }
+.incoming-department-empty { grid-column:1/-1; margin:0; padding:28px; color:#778292; text-align:center; }
+.incoming-department-menu footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0; padding:10px 12px; border-top:1px solid #e5e9ef; background:#f8fafc; }
+.incoming-department-menu footer > span { color:#657184; font-size:11px; }
+.incoming-department-menu footer > div { display:flex; gap:8px; }
+.incoming-review-panel .incoming-department-menu footer button { padding:7px 11px; font-size:11px; }
+.incoming-review-panel input, .incoming-review-panel select, .incoming-review-panel textarea { min-width: 0; }
+.incoming-review-panel table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.incoming-review-panel th, .incoming-review-panel td { padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: left; overflow-wrap: anywhere; }
+.incoming-review-panel th { background: #f1f5f9; }
+.incoming-review-panel details { margin: 12px 0; }
+.incoming-review-panel summary { cursor: pointer; padding: 10px 0; font-weight: 600; }
+.incoming-review-panel .end { flex-wrap: wrap; margin-top: 18px; }
+@media (max-width: 700px) {
+  .modal.incoming-review-overlay { padding: 10px; }
+  .incoming-review-overlay .incoming-review-panel { padding: 16px; max-height: calc(100dvh - 20px); }
+  .incoming-review-overlay .incoming-review-panel form { padding: 12px; }
+  .incoming-review-assignment { grid-template-columns: 1fr; }
+  .incoming-department-options { grid-template-columns: 1fr; }
+  .incoming-review-overlay .incoming-department-option:nth-child(odd) { border-right: 0; }
+  .incoming-department-menu { position:fixed; z-index:1600; top:auto; right:10px; bottom:10px; left:10px; }
+  .incoming-department-options { max-height:50dvh; }
+  .incoming-review-heading h2 { font-size: 20px; }
+}

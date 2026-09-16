@@ -106,7 +106,7 @@ DEFAULT_WORKERS = int(
     )
 )
 
-CACHE_VERSION = 3
+CACHE_VERSION = 4
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 CACHE_DIR.mkdir(parents=True, exist_ok=True)

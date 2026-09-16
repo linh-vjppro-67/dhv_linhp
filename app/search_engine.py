@@ -18,6 +18,7 @@ from .config import (
 )
 from .db import (
     fetch_chunks_by_ids,
+    fetch_chunks_for_documents,
     filter_chunk_ids,
     lexical_search,
 )
@@ -512,6 +513,9 @@ def _smart_search(
                     len(compact)
                     + 1
                 ),
+                "document_id": item[
+                    "document_id"
+                ],
                 "file_name": item[
                     "file_name"
                 ],
@@ -578,6 +582,49 @@ def search(
         extension=extension,
         min_score=min_score,
     )
+
+
+def search_selected(query: str, document_ids: List[int], top_k: int = 8) -> List[dict]:
+    """Rank passages only inside the explicitly selected documents."""
+    rows = fetch_chunks_for_documents(document_ids)
+    if not rows:
+        return []
+    query_norm = normalize_for_search(query)
+    broad_question = any(phrase in query_norm for phrase in (
+        'noi ve gi', 'noi gi', 'tom tat', 'noi dung chinh', 'van ban nay',
+        'bao cao nay', 'cong van nay', 'quyet dinh nay',
+    ))
+    passages = [
+        f"Tên tài liệu: {row['file_name']}\nNội dung: {row['content']}"
+        for row in rows
+    ]
+    scores = rerank(query, passages)
+    if broad_question:
+        # A general summary needs document coverage and reading order, not only
+        # the single chunk that happens to resemble the short question.
+        ranked = sorted(zip(rows, scores), key=lambda pair: (pair[0]['document_id'], pair[0]['chunk_no']))
+    else:
+        ranked = sorted(zip(rows, scores), key=lambda pair: pair[1], reverse=True)
+    results = []
+    per_document = {}
+    for row, score in ranked:
+        doc_id = int(row['document_id'])
+        per_doc_limit = max(2, top_k // max(1, len(document_ids))) if len(document_ids) > 1 else top_k
+        if per_document.get(doc_id, 0) >= per_doc_limit:
+            continue
+        per_document[doc_id] = per_document.get(doc_id, 0) + 1
+        results.append({
+            'rank': len(results) + 1,
+            'document_id': doc_id,
+            'file_name': row['file_name'],
+            'category': row['category'],
+            'page': row['page_no'],
+            'excerpt': _make_excerpt(row['content'], max_chars=1200),
+            'score': round(float(score), 3),
+        })
+        if len(results) >= top_k:
+            break
+    return results
 
 
 def debug_search(

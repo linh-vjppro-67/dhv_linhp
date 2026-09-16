@@ -339,8 +339,13 @@ def filename_first_search(
     return [
         {
             "rank": rank,
+            "document_id": item["document_id"],
             "file_name": item["file_name"],
             "category": item["category"],
+            "excerpt": (
+                "Tên văn bản khớp trực tiếp với nội dung tra cứu: "
+                + item["file_name"]
+            ),
             "score": round(
                 item["score"],
                 3,

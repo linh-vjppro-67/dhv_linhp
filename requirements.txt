@@ -10,6 +10,7 @@ rapidfuzz>=3.9
 
 torch>=2.2
 transformers>=4.48
+mlx-lm>=0.31; platform_system == "Darwin" and platform_machine == "arm64"
 sentence-transformers>=5.0
 faiss-cpu>=1.8
 

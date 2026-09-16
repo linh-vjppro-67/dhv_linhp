@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Literal, Optional
 
 from fastapi import (
     FastAPI,
@@ -29,6 +29,7 @@ from .search_engine import (
     debug_search,
     search,
 )
+from .qwen_chat import chat_search, status as qwen_status
 
 
 app = FastAPI(
@@ -57,6 +58,20 @@ class SyncRequest(BaseModel):
     use_cache: bool = True
 
 
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(..., min_length=1, max_length=4000)
+
+
+class ChatRequest(BaseModel):
+    message: str = Field(..., min_length=1, max_length=4000)
+    history: List[ChatMessage] = Field(default_factory=list)
+    top_k: int = Field(5, ge=1, le=10)
+    category: Optional[str] = None
+    folder_prefix: Optional[str] = None
+    extension: Optional[str] = None
+
+
 @app.get("/health")
 def health():
     return {
@@ -70,8 +85,29 @@ def health():
             else None
         ),
         "ocr_languages": OCR_LANGUAGES,
+        "qwen_chat": qwen_status(),
         "stats": get_stats(),
     }
+
+
+@app.post("/chat")
+def chat(payload: ChatRequest):
+    try:
+        return chat_search(
+            message=payload.message,
+            history=[item.model_dump() for item in payload.history],
+            top_k=payload.top_k,
+            category=payload.category,
+            folder_prefix=payload.folder_prefix,
+            extension=payload.extension,
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Không thể chạy Qwen local: {exc}",
+        ) from exc
 
 
 @app.post("/sync")
@@ -204,4 +240,3 @@ def stats(
     return get_stats(
         source_root=source_root
     )
-

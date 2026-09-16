@@ -207,6 +207,37 @@ button:disabled {
   font-size: 12px;
 }
 
+.archive-heading,.archive-queue-row,.report-tracking article header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px}
+.archive-heading label{font-size:12px;font-weight:700;color:#526071}
+.archive-heading select{display:block;min-width:210px;margin-top:6px;padding:9px;border:1px solid #ccd2d8;border-radius:5px}
+.archive-queue-row{padding:14px 0;border-top:1px solid #e5e9ee}
+.archive-queue-row>div:first-child{display:grid;gap:4px}
+.archive-queue-row span,.archive-queue-row small,.report-tracking small{color:#6b7280}
+.archive-queue-row em{width:max-content;padding:4px 8px;border-radius:12px;background:#fff3cd;color:#805b00;font-size:11px;font-style:normal}
+.archive-muted{color:#7b8490}
+.report-tracking article{margin-top:12px;padding:15px;border:1px solid #dce2e8;border-radius:7px}
+.report-tracking article.warning{border-color:#dfb252;background:#fff9e9}
+.report-tracking article header{margin:0}
+.report-tracking article header div{display:grid;gap:5px}
+.report-unit-columns{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:12px}
+.report-unit-columns p{margin:0;padding:10px;background:#fff;border-radius:5px}
+.report-unit-columns b,.report-unit-columns span{display:block;margin-bottom:5px;font-size:12px}
+@media(max-width:700px){.archive-heading,.archive-queue-row,.report-tracking article header{display:block}.archive-heading label{margin-top:12px;display:block}.archive-queue-row .actions{margin-top:12px}.report-unit-columns{grid-template-columns:1fr}}
+.document-register-export{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:18px;align-items:center;border-left:4px solid var(--dhv-blue)}.document-register-export>div:first-child{display:flex;align-items:center;gap:14px}.document-register-export h3,.document-register-export p{margin:0}.document-register-export p{margin-top:5px;color:#657184;font-size:12px;line-height:1.5}.register-icon{width:44px;height:44px;display:grid;place-items:center;flex:0 0 auto;border-radius:50%;background:var(--dhv-blue-soft);color:var(--dhv-blue)}.register-icon svg{width:21px}.register-export-actions{display:flex;align-items:flex-end;gap:10px}.register-export-actions label{color:#526071;font-size:11px;font-weight:700}.register-export-actions input{display:block;width:108px;height:40px;margin-top:6px;padding:8px 10px;border:1px solid #cbd3de;border-radius:5px}.register-export-actions button{height:40px;white-space:nowrap}.register-export-actions button svg{width:17px}.document-register-export>.form-error{grid-column:1/-1;margin:0}
+@media(max-width:850px){.document-register-export{grid-template-columns:1fr}.register-export-actions{justify-content:flex-end}}
+@media(max-width:520px){.register-export-actions{align-items:stretch;flex-direction:column}.register-export-actions input,.register-export-actions button{width:100%}}
+
+.meeting-export{display:flex;gap:8px}.meeting-export button{display:flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid #aebbd8;border-radius:5px;background:#fff;color:#203571}.meeting-export button svg{width:17px}
+.meeting-filters{display:flex;flex-wrap:wrap;gap:12px;margin:18px 0;padding:14px;background:#f6f8fb;border-radius:7px}
+.meeting-filters label{display:grid;gap:6px;min-width:170px;color:#526071;font-size:12px;font-weight:700}
+.meeting-filters input,.meeting-filters select{min-height:40px;padding:8px 10px;border:1px solid #ccd3dc;border-radius:5px;background:#fff}
+.meeting-totals{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.meeting-totals article{padding:15px;border:1px solid #dce2e8;border-left:3px solid #203571;border-radius:6px}
+.meeting-totals span,.meeting-totals b{display:block}.meeting-totals span{color:#687486;font-size:12px}.meeting-totals b{margin-top:6px;font-size:25px;color:#203571}
+.meeting-types{border:1px solid #dce2e8;border-radius:6px;overflow:hidden}.meeting-types h4{margin:0;padding:12px 14px;background:#f5f7f9}.meeting-types>div{display:flex;justify-content:space-between;padding:10px 14px;border-top:1px solid #e7ebf0;font-size:13px}
+@media(max-width:800px){.meeting-totals{grid-template-columns:1fr 1fr}.meeting-report .dashboard-section-title{align-items:flex-start;gap:12px}.meeting-export{flex:none}}
+@media(max-width:500px){.meeting-totals{grid-template-columns:1fr}.meeting-filters label{width:100%}}
+
 .signing-modal {
   padding: 22px;
   z-index: 10;
